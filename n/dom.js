@@ -169,8 +169,8 @@ $('#saveEdit').on('click', function(){
 		message('変更なしになっています', 'warning', '#emalert');
 		$('#editTitle').addClass('is-invalid');
 		$('#editGenre').addClass('is-invalid');
-	} else if ($.inArray(id, y[genre]) !== -1){
-		message('既に移動先のジャンルに登録されている動画です', 'warning', '#emalert');
+	//} else if ($.inArray(id, y[genre]) !== -1){
+		//message('既に移動先のジャンルに登録されている動画です', 'warning', '#emalert');
 	} else {
 		var mesElem = $('<div>');
 		var table = $('<table>', {'class':'mb-4'});
@@ -292,6 +292,7 @@ $('#ccopen').on('click', function(){
 					thisElem.parent().find('.ccgenrename').each(function(i, elem){
 						if ($(elem).text() !== thisElem.text() && $(elem).next().css('display') !== 'none'){
 							$(elem).next().css('display', 'none');
+							$(elem).find('.genre_indicator').text('-');
 						}
 					});
 					thisElem.find('.genre_indicator').text('+');
@@ -857,7 +858,7 @@ function pushHistory(queryStr) {
 	localStorage.setItem('searchhistory', JSON.stringify(searchHistory));
 }
 function init(){
-	$('input[type=checkbox]').each(function(){    
+	$('input[type=checkbox]').each(function(){	
 		var id = $(this).attr('id');
 		if (typeof id != 'undefined'){
 			var bool = window.localStorage.getItem(id);
@@ -953,7 +954,7 @@ function init(){
 function unload(){
 	var tabs = int(localStorage.getItem('_nicolistTabCount'));
 	if (tabs == 1){
-	    localStorage.removeItem('_nicolistTabCount');
+		localStorage.removeItem('_nicolistTabCount');
 	} else if (tabs >= 2){
 		localStorage.setItem('_nicolistTabCount', tabs-1);
 	}
@@ -966,101 +967,132 @@ function refresh(whatChanged){
 	var genreChanged = whatChanged.indexOf('g') != -1;
 	var selectChanged = whatChanged.indexOf('s') != -1;
 	if (selectChanged || genreChanged){
-	    //genreのselectの更新
-	    //#leftの更新
-	    $("select[role='genre']").html('');
-	    $('#left').html('');
-	    for (var genre in y){
-	        //select更新
-	        $("select[role='genre']").each(function(i, elem){
-	        	$(elem).append($('<option>', {
-	        		'value': genre,
-	        		text: genre
-	        	}));
-	        });
-	        //#left更新
-	        //TODO : display how many videos are registered after each list in #left (configurable)
-	        $('<li>', {
-	        	'class': (genre === selectedGenre ? 'list-group-item selected' : 'list-group-item'),
-	        	text: genre,
-	        	click: function(){
-	        		var genre2 = $(this).text();
-	        		if (selectedGenre != genre2){
-	        			setSelGen(genre2);
-	        			refresh('s');
-	        		}
-	        	}
-	        }).appendTo("#left");
-	    }
-	    var g = localStorage.getItem('selectedgenre');
-	    if (g != null){
-	    	$('select[role="genre"]').val(g);
-	    }
+		//genreのselectの更新
+		//#leftの更新
+		$("select[role='genre']").html('');
+		$('#left').html('');
+		for (var genre in y){
+			//select更新
+			$("select[role='genre']").each(function(i, elem){
+				$(elem).append($('<option>', {
+					'value': genre,
+					text: genre
+				}));
+			});
+			//#left更新
+			//TODO : display how many videos are registered after each list in #left (configurable)
+			$('<li>', {
+				'class': (genre === selectedGenre ? 'list-group-item selected' : 'list-group-item'),
+				text: genre,
+				click: function(){
+					var genre2 = $(this).text();
+					if (selectedGenre != genre2){
+						setSelGen(genre2);
+						refresh('s');
+					}
+				}
+			}).appendTo("#left");
+		}
+		var g = localStorage.getItem('selectedgenre');
+		if (g != null){
+			$('select[role="genre"]').val(g);
+		}
 	}
 	if (selectChanged || genreChanged || videoChanged){
-	    //#rightの更新
-	    $("#right").html('');
-	    if (selectedGenre === 'とりあえず'){
-	    	$("<h4>", {
-	    		text: selectedGenre
-	    	}).append(
-		    	$('<small>', {
-		    		'class': 'text-muted ml-2',
-		    		text: '('+(y[selectedGenre].length/2)+')'
-		    	})
-	    	).appendTo("#right");
-	    } else {
-	    	$("<h4>", {
-	    		text: selectedGenre
-	    	}).append(
-		    	$('<small>', {
-		    		'class': 'text-muted ml-2 mr-1',
-		    		text: '('+(y[selectedGenre].length/2)+')'
-		    	})
-	    	).append(
-		    	$('<small>', {
-		    		'class': 'removevideo',
-		    		'data-genre' : selectedGenre,
-		    		'title': 'ジャンルを削除',
-		    		text: '×',
-		    		click: function() {
-		    			removeGenre($(this));
-		    		}
-		    	})
-	    	).appendTo("#right");
-	    }
-	    var list = y[selectedGenre];
+		//#rightの更新
+		$("#right").html('');
+		if (selectedGenre === 'とりあえず'){
+			$("<h4>", {
+				text: selectedGenre
+			}).append(
+				$('<small>', {
+					'class': 'text-muted ml-2',
+					text: '('+(y[selectedGenre].length/2)+')'
+				})
+			).appendTo("#right");
+		} else {
+			$("<h4>", {
+				text: selectedGenre
+			}).append(
+				$('<small>', {
+					'class': 'text-muted ml-2 mr-1',
+					text: '('+(y[selectedGenre].length/2)+')'
+				})
+			).append(
+				$('<small>', {
+					'class': 'removevideo',
+					'data-genre' : selectedGenre,
+					'title': 'ジャンルを削除',
+					text: '×',
+					click: function() {
+						removeGenre($(this));
+					}
+				})
+			).appendTo("#right");
+		}
+		var list = y[selectedGenre];
 		if ($('#nicolist_sort').prop('checked')){
 			list = reversePairList(list);
 		}
-	    for (var i = 0; i < list.length/2; i++){
-	    	var id = list[2*i];
-	    	var title = list[2*i+1];
-	    	var div = $('<div>', {
-	    		'class': 'd-flex flex-row'
-	    	});
-	    	var a = $( "<a>", {
-	    		"href": getVideoURL(id),
-	    		'target': '_blank',
-	    		'data-genre' : selectedGenre,
-	    		'data-id' : id,
-	    		'data-title' : title,
-	    		'class': 'rightvideo',
-	    		contextmenu: function(e){
-	    			var _b = $('#nicolist_sort').prop('checked') ? 'right_reversed' : 'right';
-	    			showMenu(e.pageX, e.pageY, $(this), _b);
-	    			return false;
-	    		}
-	    	});
-	    	if ($('#nicolist_thumb').prop('checked')){
-	    		a.append(createThumbImgElem(id, false));
-	    	}
-	    	a.append($('<span>',{
-	    		text: restr2(title, 50)
-	    	}))
-	    	a.appendTo(div);
-	    	div.appendTo("#right");
-	    }
+		for (var i = 0; i < list.length/2; i++){
+			var id = list[2*i];
+			var title = list[2*i+1];
+			var div = $('<div>', {
+				'class': 'd-flex flex-row'
+			});
+			var a = $( "<a>", {
+				"href": getVideoURL(id),
+				'target': '_blank',
+				'data-genre' : selectedGenre,
+				'data-id' : id,
+				'data-title' : title,
+				'class': 'rightvideo',
+				contextmenu: function(e){
+					var _b = $('#nicolist_sort').prop('checked') ? 'right_reversed' : 'right';
+					showMenu(e.pageX, e.pageY, $(this), _b);
+					return false;
+				}
+			});
+			if ($('#nicolist_thumb').prop('checked')){
+				a.append(createThumbImgElem(id, false));
+			}
+			if ($('#nicolist_taggedtitle').prop('checked')){
+				var _ma = title.match(/【[^【】]+】/g);//【】
+				var _mb = title.match(/\[[^\[\]]+\]/g);//[]
+				var tags = [];
+				var converted_title = title;
+				if (_ma){
+					for (var j = 0; j < _ma.length; j++) {
+						tags.push(_ma[j]);
+					}
+					converted_title = converted_title.replace(/【[^【】]+】/g, '');
+				}
+				if (_mb){
+					for (var j = 0; j < _mb.length; j++) {
+						tags.push(_mb[j]);
+					}
+					converted_title = converted_title.replace(/\[[^\[\]]+\]/g, '');
+				}
+				converted_title = converted_title.replace(/^\s+/g, '').replace(/\s+$/g, '');
+				a.append($('<span>',{
+					text: converted_title,
+					'class': 'mr-2'
+				}));
+				if (!$('#nicolist_thumb').prop('checked')) div.addClass('mt-1');
+				for (var j = 0; j < tags.length; j++) {
+					a.append($('<span>',{
+						text: tags[j].slice(1, -1),
+						'class': 'titletag ml-1'
+					}))
+				}
+			} else {
+				a.append($('<span>',{
+					text: restr2(title, 50)
+				}));
+			}
+			a.appendTo(div);
+			div.appendTo("#right");
+		}
 	}
 	//TODO : what this does?
 	if (genreChanged || videoChanged){
@@ -1115,8 +1147,22 @@ function refresh(whatChanged){
 		}
 		$('#out').val(JSON.stringify(y, null, '    '));
 		localStorage.setItem('nicolist', JSON.stringify(y));
-		$('#length').text('('+bytesize(JSON.stringify(y))+'byte)');
+		$('#length').text('('+sizeString(bytesize(JSON.stringify(y)))+')');
 	}
+}
+function sizeString(byte){
+    if (byte < 500){
+        return byte + " byte";
+    } else if (byte < 500000){
+        var a = Math.round( byte * 100 / 1024 ) / 100;
+        return a + " KB";
+    } else if (byte < 500000000){
+        var a = Math.round( (byte * 100 / 1024) / 1024 ) / 100;
+        return a + " MB";
+    } else {
+        var a = Math.round( ((byte * 100 / 1024) / 1024) / 1024 ) / 100;
+        return a + " GB";
+    }
 }
 function showMenu(coord_x, coord_y, cont, mode){
 	var id = cont.attr('data-id');
@@ -1309,7 +1355,7 @@ function removeVideo(elem){
 		}
 		y[genre] = newlist;
 		messageUndoable('動画「'+restr(title, 50)+'」を削除しました', 'danger');
-	    refresh('v');//video change
+		refresh('v');//video change
 	});
 }
 function removeGenre(elem){
@@ -1325,7 +1371,7 @@ function removeGenre(elem){
 		y = newy;
 		messageUndoable('ジャンル「'+genre+'」を削除しました', 'danger');
 		setSelGen(Object.keys(y)[0]);
-	    refresh('gs');//genre change
+		refresh('gs');//genre change
 	});
 }
 function setSelGen(genre){
@@ -1580,7 +1626,7 @@ function setupYoutubeIframe(id){
 		width: s[0],
 		height: s[1],
 		videoId: id,
-    	playerVars: { 'autoplay': (autoplay ? 1 : 0)},
+		playerVars: { 'autoplay': (autoplay ? 1 : 0)},
 		events: {
 			'onStateChange': function(event){
 				if (event.data === YT.PlayerState.ENDED){
@@ -1590,13 +1636,13 @@ function setupYoutubeIframe(id){
 					player.playVideo();
 					autoplay = false;
 				}
-	        },
-	        'onError': function(event){
+			},
+			'onError': function(event){
 				addToDeletedVideoList(id);
 				autoplay = true;
 				next();
-	        }
-	    }
+			}
+		}
 	});
 }
 function setupNiconicoIframe(id){
@@ -1813,21 +1859,21 @@ $(window).resize(function() {
 	}
 });
 function promptWinExplorer(filename, content){
-    var file = new Blob([content], {type: 'text/plane;'});
-    if (window.navigator.msSaveOrOpenBlob) {
-        window.navigator.msSaveOrOpenBlob(file, filename);
-    } else {
-        var a = document.createElement('a');
-        var url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
-        }, 0); 
-    }
+	var file = new Blob([content], {type: 'text/plane;'});
+	if (window.navigator.msSaveOrOpenBlob) {
+		window.navigator.msSaveOrOpenBlob(file, filename);
+	} else {
+		var a = document.createElement('a');
+		var url = URL.createObjectURL(file);
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function() {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);  
+		}, 0); 
+	}
 }
 $('#issueRaw').on('click', function(){
 	var d = new Date();
@@ -1845,15 +1891,15 @@ $('#fromRawFile').on('change', function (e){
 	}
 
 	var reader = new FileReader();
-    reader.readAsText(files[0]);
+	reader.readAsText(files[0]);
 
-    reader.onload = function (){
-    	try {
+	reader.onload = function (){
+		try {
 			var toload = JSON.parse(reader.result);
-    	} catch (e){
+		} catch (e){
 			message('フォーマットが正しくありません', 'warning', '#prefalert');
 			return;
-    	}
+		}
 		var videocount = 0;
 		var genrecount = 0;
 		if (!(toload instanceof Object)){
@@ -1881,7 +1927,7 @@ $('#fromRawFile').on('change', function (e){
 				}
 			}
 		}
-		if (videocount===0&&genrecount===0){
+		if (videocount === 0 && genrecount === 0){
 			message('すべて登録済みの動画です', 'warning', '#prefalert');
 		} else {
 			pushPrev();
