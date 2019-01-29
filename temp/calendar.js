@@ -1,37 +1,58 @@
+var calender_month;
+var calender_year;
+
 $(function(){
     var myDate = new Date();
-    var myYear = myDate.getFullYear();	// 年を取得
-    var MyMonth = myDate.getMonth();	// 月を取得(0月～11月)
-    setCalender(myYear,MyMonth);
+    calender_year = myDate.getFullYear();	// 年を取得
+    calender_month = myDate.getMonth();	// 月を取得(0月～11月)
+    setCalender(calender_year,calender_month);
 
     $('.next').click(function(){
 
-        MyMonth++;
-        if(MyMonth == 12){
-            MyMonth = 0;
-            myYear++;
+        calender_month++;
+        if(calender_month == 12){
+            calender_month = 0;
+            calender_year++;
         }
         $('#calendarbody').empty();
         $('#monthyear').empty();
-        $('#calendarbody').text(setCalender(myYear,MyMonth));
+        $('#calendarbody').text(setCalender(calender_year,calender_month));
     });
 
-    $('.buck').click(function(){
+    $('.back').click(function(){
 
-        MyMonth--;
-        if(MyMonth == -1){
-            MyMonth = 11;
-            myYear--;
+        calender_month--;
+        if(calender_month == -1){
+            calender_month = 11;
+            calender_year--;
         }
         $('#calendarbody').empty();
         $('#monthyear').empty();
-        $('#calendarbody').text(setCalender(myYear,MyMonth));
+        $('#calendarbody').text(setCalender(calender_year,calender_month));
     });
 });
 
-
+/**
+ * make calender
+ * @param {number} y full year e.g. 2019
+ * @param {number} l month minus one 0-11
+ */
 function setCalender(y,l){
     'use strict';
+
+    var worktimes_for_month_l = {}
+
+	for (var i = 0; i < WORKTIME_ARRAY.length; i++) {
+        var WORKTIME = WORKTIME_ARRAY[i];
+        if (WORKTIME.start.getMonth() === l){
+            var key = WORKTIME.getDayKey();
+            if (!worktimes_for_month_l.hasOwnProperty(key)){
+                worktimes_for_month_l[key] = []
+            }
+            worktimes_for_month_l[key].push(WORKTIME.thfs('{h}:{m}'));
+        }
+    }
+
     var myDate = new Date();
     var myToday = myDate.getDate();	// 今日の'日'を退避
     var todayMyMonth = myDate.getMonth();	// 月を取得(0月～11月)
@@ -68,10 +89,21 @@ function setCalender(y,l){
         source += tr;
         for (var j = 0; j < 7; j++) {
             var mydat = myTable[j+(i*7)];
-            if(todayMyMonth === myMonth && mydat === myToday){
-                source += '<td class="' + myYear + '/'  + thisMonth　+ '/' + mydat + '" id="today">' + mydat + tdC;
-            }else{
-                source += '<td class="' + myYear + '/'  + thisMonth  + '/' + mydat + '">' + mydat + tdC;
+            if (mydat === ' '){
+                source += '<td> </td>';
+                continue;
+            } else {
+                var daykey = y+"/"+thisMonth+"/"+mydat;
+                if (worktimes_for_month_l.hasOwnProperty(daykey)){
+                    var desc = worktimes_for_month_l[daykey].join('<br>')
+                    var attr_today = todayMyMonth === myMonth && mydat === myToday ? 'id="today" ' : '';
+                    source += '<td '+attr_today+'data-key="'+myYear+'/'+thisMonth+'/'+mydat
+                        +'"><div class="cal_workday" data-toggle="calender_tooltip" title="勤務時間: <br>'+desc+'">' + mydat + '</div>' + tdC;
+                } else {
+                    var attr_today = todayMyMonth === myMonth && mydat === myToday ? 'id="today" ' : '';
+                    source += '<td '+attr_today+'data-key="'+myYear+'/'+thisMonth+'/'+mydat
+                        +'" onclick=""><div>' + mydat + '</div>' + tdC;
+                }
             }
         }
         source += trC;
@@ -92,13 +124,18 @@ function setCalender(y,l){
 
     $calendarbody.append(tableSource);
     $monthyear.append(mandy);
+    $('[data-toggle="calender_tooltip"]').tooltip({
+        html:true,
+        placement: "auto",
+        template: '<div class="tooltip cal_tooltip" role="tooltip"><div class="arrow"></div><div class="calender-hover tooltip-inner"></div></div>'
+    })
 }
 
 
 //イメージしてること！
-//勤務が入ってる日なら、適当になんかクラスを追加してCSSで、カレンダーを見て勤務日が分かるようにしたい
-//日を選べば、その日の勤務時間が分かるようにしたい！
-//日を選んで、その日の勤務を編集したり、その日に勤務を追加したりもしたいけど
+//ok   勤務が入ってる日なら、適当になんかクラスを追加してCSSで、カレンダーを見て勤務日が分かるようにしたい
+//ok   日を選べば、その日の勤務時間が分かるようにしたい！
+//mada 日を選んで、その日の勤務を編集したり、その日に勤務を追加したりもしたいけど
 //それは既存の関数でいけそうなきがする
 //CSSの調整ぐらいは自分で頑張れる気がするけど
 //勤務日かどうかの判定をどうすればいいのかさっぱり、、、

@@ -39,6 +39,22 @@ iframe{display: none}
 .list-group-item{border-style: none}
 .salaryHidden{display: none}
 .salaryShown{display: block}
-#calendar #today{color: #01917b}
+#calendar #today{background-color: #01917b; color:#fff}
 #calendar .sat{color: blue}
 #calendar .sun{color: red}
+#calendarbody div{padding-top:4px;padding-bottom: 4px;}
+#calendarbody .cal_workday{margin-left:auto;margin-right:auto;max-width:30px;padding-bottom: 0;border-bottom:4px solid #ff0044!important;cursor: pointer;}
+.cal_tooltip .tooltip-inner{background-color: #001832}
+
+.cal_tooltip.bs-tooltip-top .arrow::before, .cal_tooltip.bs-tooltip-auto[x-placement^="top"] .arrow::before {
+  border-top-color: #001832;
+}
+.cal_tooltip.bs-tooltip-right .arrow::before, .cal_tooltip.bs-tooltip-auto[x-placement^="right"] .arrow::before {
+  border-right-color: #001832;
+}
+.cal_tooltip.bs-tooltip-bottom .arrow::before, .cal_tooltip.bs-tooltip-auto[x-placement^="bottom"] .arrow::before {
+  border-bottom-color: #001832;
+}
+.cal_tooltip.bs-tooltip-left .arrow::before, .cal_tooltip.bs-tooltip-auto[x-placement^="left"] .arrow::before {
+  border-left-color: #001832;
+}

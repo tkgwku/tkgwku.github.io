@@ -313,7 +313,7 @@ function addOneWt(worktime, dontPushToPrevious) {
 		if (worktime.equals(WORKTIME)){
 			message(worktime.getDateString()+'の勤務時間'+worktime.thfs(null, '{s}-{f}')+'はすでに存在します。');
 			//pushしない.
-			return false;
+			return;
 		} else {
 			var compat = worktime.compatibleWith(WORKTIME);
 			if (compat instanceof Worktime){
@@ -330,10 +330,9 @@ function addOneWt(worktime, dontPushToPrevious) {
 			        //競合している元のデータを削除し、新しいデータを追加。
 			        message(WORKTIME.getDateString()+'の'+WORKTIME.thfs(null, '{s}-{f}')+'は削除されました。');
 			        //元のデータはいらないのでpushしない。
-			        return false;
 			    } else {
-			    	message('追加をキャンセルしました。');
-			    	return false;
+					message('追加をキャンセルしました。');
+					return;
 			    }
 			}
 		}
@@ -341,7 +340,8 @@ function addOneWt(worktime, dontPushToPrevious) {
 	//新しいデータをpush
 	if (shouldPush) arr.push(worktime);
 	replaceWtArray(arr, dontPushToPrevious);
-	return true;
+	message(worktime.getDateString()+'に勤務時間'+worktime.thfs()+'を追加しました。', 'success');
+	refresh();
 }
 
 //WORKTIME_ARRAYをLocalStorageに保存
@@ -579,6 +579,9 @@ function refresh(onInit) {
 	refreshTable(onInit);
 	refreshNextWork();
 	refreshStyle();
+	$('#calendarbody').empty();
+	$('#monthyear').empty();
+	setCalender(calender_year,calender_month);
 }
 
 //月勤務時間一覧(=listWTModal)の初期化をするよ。
