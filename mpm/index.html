@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>マテリアルポイント作成</title>
+	<style>
+		.hidden{display:none}
+		.acol{border:1px solid #d7cce7;background-color:#e4dcf0;}
+		.colpick{color:#8973a8}
+		.pointer:hover{cursor:pointer}
+		.inline-block{display:inline-block}
+		.purple{color:#8973a8}
+		.hover-purple:hover .purple{color:#7d35d4}
+		.hover-purple:hover svg{fill:#7d35d4}
+		.invisible{visibility:invisible}
+		.prep1{min-width:100px}
+		.prep2{min-width:140px}
+		#filecontent,#filecontent_sncond{min-height:100px;font-family:monospace}
+	</style>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<style>
+		.btn-outline-primary {
+			color: #8e65c7;
+			border-color: #8e65c7;
+		}
+		.btn-outline-primary:hover {
+			color: #fff;
+			background-color: #8e65c7;
+			border-color: #8e65c7;
+		}
+		.btn-outline-primary:focus, .btn-outline-primary.focus {
+			box-shadow: 0 0 0 0.2rem rgba(100, 53, 166, 0.5);
+		}
+		.btn-outline-primary.disabled, .btn-outline-primary:disabled {
+			color: #8e65c7;
+			background-color: transparent;
+		}
+	</style>
+</head>
+<body>
+	<div class="container pb-4">
+		<h1 class="mt-4 mb-4">正方形格子用・等間隔マテリアルポイント作成</h1>
+		<div class="row">
+			<div class="pointer col-sm pt-1 acol hover-purple" id="toggler-addMP">
+				<div title="マテリアルポイント追加" >
+					<div class="inline-block purple">マテリアルポイント追加</div>
+					<svg height="40" viewBox="0 0 16 16" class="bi bi-plus" fill="#8973a8" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+					</svg>
+				</div>
+			</div>
+			<div class="pointer col-sm pt-1 acol hover-purple" id="toggler-addNCOND">
+				<div title="境界条件追加" >
+					<div class="inline-block purple">境界条件追加</div>
+					<svg height="40" viewBox="0 0 16 16" class="bi bi-plus" fill="#8973a8" xmlns="http://www.w3.org/2000/svg">
+						<path fill-rule="evenodd" d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+					</svg>
+				</div>
+			</div>
+			<div class="col-sm pt-1 invisible">
+			</div>
+		</div>
+		<div id="toggle-addMP" class="hidden">
+			<div class="row mt-4">
+				<div class="col-sm acol pt-2">
+					<div class="purple mb-2">マテリアルポイントの座標から入力</div>
+				</div>
+				<div class="col-sm acol pt-2">
+					<div class="purple mb-2">格子の情報から入力</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm pt-3 pb-3 acol">
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep1">材料番号</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：1" id="MPmat-fromXY">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep1">始点XY</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：0.25" id="MPx1-fromXY">
+						<input type="text" class="form-control" placeholder="例：0.25" id="MPy1-fromXY">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep1">終点XY</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：11.75" id="MPx2-fromXY">
+						<input type="text" class="form-control" placeholder="例：26.75" id="MPy2-fromXY">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep1">間隔</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：0.50" id="MPinterval-fromXY">
+					</div>
+					<input class="btn btn-outline-primary" type="button" value="適用" id="submit-addMP-fromXY">
+				</div>
+				<div class="col-sm pt-3 pb-3 acol">
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep2">材料番号</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：1" id="MPmat-fromGrid">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep2">格子の始点XY</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：0.00" id="MPx1-fromGrid">
+						<input type="text" class="form-control" placeholder="例：0.00" id="MPy1-fromGrid">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep2">格子の終点XY</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：12.00" id="MPx2-fromGrid">
+						<input type="text" class="form-control" placeholder="例：27.00" id="MPy2-fromGrid">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep2">格子幅</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：1.0" id="MPgridWidth-fromGrid">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text prep2">格子内MP数</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：4" id="MPnumInGrid-fromGrid">
+					</div>
+					<input class="btn btn-outline-primary" type="button" value="適用" id="submit-addMP-fromGrid">
+				</div>
+			</div>
+		</div>
+		<div id="toggle-addNCOND" class="hidden">
+			<div class="row mt-4">
+				<div class="col-sm pt-3 pb-3 acol">
+					<div class="purple mb-2">境界条件の追加</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text" id="basic-addon1">始点XY</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：1.00" id="ncond_x1">
+						<input type="text" class="form-control" placeholder="例：1.00" id="ncond_y1">
+					</div>
+					<div class="input-group mb-3">
+						<div class="input-group-prepend">
+							<span class="input-group-text" id="basic-addon1">終点XY</span>
+						</div>
+						<input type="text" class="form-control" placeholder="例：1.00" id="ncond_x2">
+						<input type="text" class="form-control" placeholder="例：26.00" id="ncond_y2">
+					</div>
+					<div>
+						<input type="radio" value="sncond_x" name="sncond_fix" id="sncond_x">
+						<label class="pointer" for="sncond_x">X固定</label>
+						<input class="ml-3" type="radio" value="sncond_y" name="sncond_fix" id="sncond_y">
+						<label class="pointer" for="sncond_y">Y固定</label>
+						<input class="ml-3" type="radio" value="sncond_xy" name="sncond_fix" id="sncond_xy">
+						<label class="pointer" for="sncond_xy">XY固定</label>
+					</div>
+					<input class="btn btn-outline-primary" type="button" value="適用" id="submit-addNCOND">
+				</div>
+				<div class="col-sm pt-3 acol"></div>
+			</div>
+		</div>
+		
+		<div>
+			<div class="purple mb-2 mt-3">マテリアルポイント(input_mp.dat) 内容</div>
+			<textarea class="form-control" placeholder="ファイル内容はここに表示されます" id="filecontent" onclick="this.focus();this.select()" readonly="readonly"></textarea>
+			<input class="btn btn-outline-primary mt-2" type="button" value="input_mp.datを保存" id="savefile">
+		</div>
+		
+		<div class="mt-4">
+			<div class="purple mb-2">境界条件(config.datの一部) 内容</div>
+			<textarea class="form-control" placeholder="ファイル内容はここに表示されます" id="filecontent_sncond" onclick="this.focus();this.select()" readonly="readonly"></textarea>
+		</div>
+		
+		
+		<div class="mt-4 purple">プレビュー</div>
+		
+		<div id="MPcanvas-wrapper" class="mt-3" style="position:absolute">
+			<div id="MPcanvas" width="100px" height="100px"></div>
+		</div>
+		<div min-height="200px" id="MPbackground"></div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+	<script type="text/javascript">
+		$(function(){
+			initLS()
+			$("#toggler-addMP").on('click', function(){
+				$("#toggle-addMP").toggleClass("hidden")
+				$("#toggle-addNCOND").addClass("hidden")
+			});
+			$("#toggler-addNCOND").on('click', function(){
+				$("#toggle-addMP").addClass("hidden")
+				$("#toggle-addNCOND").toggleClass("hidden")
+			});
+			$("#submit-addMP-fromXY").on('click', function(){
+				let mm = parseInt($("#MPmat-fromXY").val())
+				let x1 = parseFloat($("#MPx1-fromXY").val())
+				let y1 = parseFloat($("#MPy1-fromXY").val())
+				let x2 = parseFloat($("#MPx2-fromXY").val())
+				let y2 = parseFloat($("#MPy2-fromXY").val())
+				let interval = parseFloat($("#MPinterval-fromXY").val())
+				addMP_fromXY(mm,x1,y1,x2,y2,interval)
+				convert()
+				drawRect()
+			});
+			$("#submit-addMP-fromGrid").on('click', function(){
+				let mm = parseInt($("#MPmat-fromGrid").val())
+				let x1 = parseFloat($("#MPx1-fromGrid").val())
+				let y1 = parseFloat($("#MPy1-fromGrid").val())
+				let x2 = parseFloat($("#MPx2-fromGrid").val())
+				let y2 = parseFloat($("#MPy2-fromGrid").val())
+				let gridWidth = parseFloat($("#MPgridWidth-fromGrid").val())
+				let numInGrid = parseInt($("#MPnumInGrid-fromGrid").val())
+				addMP_fromGrid(mm,x1,y1,x2,y2,gridWidth,numInGrid)
+				convert()
+				drawRect()
+			});
+			$("#savefile").on('click',function(){
+				saveAsFile("input_mp.dat",$("#filecontent").text())
+			})
+			$("#submit-addNCOND").on('click', function(){
+				let x1 = parseFloat($("#ncond_x1").val())
+				let y1 = parseFloat($("#ncond_y1").val())
+				let x2 = parseFloat($("#ncond_x2").val())
+				let y2 = parseFloat($("#ncond_y2").val())
+				let fix = $("input[name=sncond_fix]:checked").val()
+				addNCOND(x1,y1,x2,y2,fix)
+				convertNcond()
+				drawRect()
+			})
+		});
+		
+		function initLS(){
+			$("input[type=text]").each(function(event, elem){
+				if (elem.hasAttribute("id")){
+					$(elem).on('change', function(ev2){
+						let id = $(ev2.target).attr("id")
+						let val = $(ev2.target).val()
+						localStorage.setItem(id, val)
+					});
+					let ls = localStorage.getItem($(elem).attr("id"))
+					if (ls) {
+						$(elem).val(ls)
+					}
+				}
+			})
+			$("input[type=radio]").each(function(event, elem){
+				if (elem.hasAttribute("name")){
+					$(elem).on('change', function(ev2){
+						let name = $(ev2.target).attr("name")
+						let val = $("input[name="+name+"]:checked").val()
+						localStorage.setItem(name, val)
+					});
+					//無駄に三海実行されるけどまあいいや
+					let ls = localStorage.getItem($(elem).attr("name"))
+					if (ls) {
+						$(elem).val([ls])
+					}
+				}
+			})
+		}
+		
+		var MPtree = []
+		var MPcount = 0
+		var MPrect = []
+		
+		function addToMPTree(id,x,y,mm){
+			MPtree.push({
+				"id": id,
+				"x": x,
+				"y": y,
+				"mm": mm
+			})
+		}
+		
+		function addMP_fromGrid(mm,x1,y1,x2,y2,gridWidth,numInGrid){
+			let sqrt_numInGrid = Math.round(Math.sqrt(numInGrid))
+			let col = Math.round(Math.abs(x2-x1) / gridWidth)
+			let row = Math.round(Math.abs(y2-y1) / gridWidth)
+			for (let j = 0;j < row;j++){
+				for (let i = 0;i < col;i++){
+					for (let p = 0;p < sqrt_numInGrid;p++){
+						for (let q = 0;q < sqrt_numInGrid;q++){
+							MPcount++
+							let x = Math.min(x1,x2) + i * gridWidth + (1+2*p) * gridWidth/(2*sqrt_numInGrid)
+							let y = Math.min(y1,y2) + j * gridWidth + (1+2*q) * gridWidth/(2*sqrt_numInGrid)
+							addToMPTree(MPcount,x,y,mm)
+						}
+					} 
+				}
+			}
+		}
+		
+		function addMP_fromXY(mm,x1,y1,x2,y2,interval){
+			let col = Math.round(Math.abs(x2-x1) / interval) + 1
+			let row = Math.round(Math.abs(y2-y1) / interval) + 1
+			for (let j = 0;j < row;j++){
+				for (let i = 0;i < col;i++){
+					MPcount++
+					let x = Math.min(x1,x2) + i * interval
+					let y = Math.min(y1,y2) + j * interval
+					addToMPTree(MPcount,x,y,mm)
+				}
+			}
+		}
+		
+		function convert(){
+			let content = ""
+			for (let i = 0; i < MPtree.length; i++){
+				let id = MPtree[i].id
+				let x = MPtree[i].x
+				let y = MPtree[i].y
+				let mm = MPtree[i].mm
+				let iid = indentify_int(id,5)
+				let ix = indentify_float(x,5,10)
+				let iy = indentify_float(y,5,10)
+				let imm = indentify_int(mm,5)
+				let line = iid+ix+iy+imm+"\n"
+				content += line
+			}
+			$("#filecontent").text(content)
+		}
+		
+		function indentify_int(n, indent){
+			let s = n+""
+			let slen = s.length
+			if (indent < slen) console.error("indent < slen")
+			if (indent > 29) console.error("indent > 29")
+			s="                             ".substring(0, indent-slen)+s
+			return s
+		}
+		
+		function indentify_float(n, k, indent){
+			let s = n+""
+			let _s = s.split(".")
+			if (_s.length > 2) console.error("_s.length > 2")
+			if (_s.length === 2){
+				s = _s[0] +"."+ _s[1].substring(0, k)
+			} else {
+				if (s.length < indent-1){
+					s=s+".0"
+				}
+			}
+			let slen = s.length
+			if (indent < slen) console.error("indent < slen")
+			if (indent > 29) console.error("indent > 29")
+			s="                             ".substring(0, indent-slen)+s
+			return s
+		}
+		
+		const canvas = document.getElementById("MPcanvas")
+		const color_fill_list = ["#c8e1fb", "#dccbf8", "#ded5ef", "#f6d4e4", "#f4d3d6", "#fbe1cc", "#fbefc9", "#d0e9d6", "#cef0e6", "#cde8ed"]
+		const color_list = ["#007bff","#6610f2","#e83e8c","#dc3545","#fd7e14","#ffc107","#28a745","#20c997","#6f42c1","#17a2b8"]
+		
+		//__mutiply_color(["#007bff","#6610f2","#6f42c1","#e83e8c","#dc3545","#fd7e14","#ffc107","#28a745","#20c997","#17a2b8"], 0.4, 120)
+		//__mutiply_color(["#007bff","#6610f2","#6f42c1","#e83e8c","#dc3545","#fd7e14","#ffc107","#28a745","#20c997","#17a2b8"], 0.2, 200)
+		
+		function __mutiply_color(colors, mul, offs){
+			c=[]
+			for (let i = 0; i < colors.length;i++){
+				let s = colors[i]
+				let r = parseInt(s.substring(1, 3), 16)
+				let g = parseInt(s.substring(3, 5), 16)
+				let b = parseInt(s.substring(5, 7), 16)
+				r = Math.round(r*mul+offs)
+				g = Math.round(g*mul+offs)
+				b = Math.round(b*mul+offs)
+				r = r > 255 ? 255 : r
+				g = g > 255 ? 255 : g
+				b = b > 255 ? 255 : b
+				rs = r < 16 ? "0"+r.toString(16) : r.toString(16)
+				gs = g < 16 ? "0"+g.toString(16) : g.toString(16)
+				bs = b < 16 ? "0"+b.toString(16) : b.toString(16)
+				s = "#"+rs+""+gs+""+bs
+				c.push(s)
+				$("<div>").css({"background-color":s,"color":"white"}).text(s).appendTo("body")
+			}
+			console.log(c)
+		}
+		
+		const boxWidth = 0.6
+		const canvasWidth = 400
+		var mp_radius = 2
+		
+		function drawRect(){
+			clearCanvas()
+			let ratio = canvasWidth/(getMaxX() - getMinX())
+			$(canvas).attr("min-height", Math.round((getMaxY() - getMinY()) * ratio))
+			$("#MPbackground").css({"min-height":Math.round((getMaxY() - getMinY()) * ratio)+50+"px"})
+			$(canvas).attr("width", canvasWidth)
+			for (let i = 0; i < MPtree.length;i++){
+				let id = MPtree[i].id
+				let x = MPtree[i].x
+				let y = MPtree[i].y
+				let mm = MPtree[i].mm
+				let color = color_list[(mm % color_list.length)]
+				/*
+				let l = false
+				let r = false
+				let u = false
+				let d = false
+				
+				for (let j = 0; j < MPtree.length;j++){
+					let x1 = MPtree[j].x
+					let y1 = MPtree[j].y
+					if (mm === MPtree[j].mm){
+						if (id !== MPtree[j].id){
+							if (!l && isLeftNeighbor(x,y,x1,y1)){
+								l = true
+							}
+							if (!r && isRightNeighbor(x,y,x1,y1)){
+								r = true
+							}
+							if (!u && isUpNeighbor(x,y,x1,y1)){
+								u = true
+							}
+							if (!d && isDownNeighbor(x,y,x1,y1)){
+								d = true
+							}
+							if (l && r && u && d){
+								color = color_fill_list[mm % color_list.length]
+								break
+							}
+						}
+					}
+				}*/
+				let canv_x = translateX(x)
+				let canv_y = translateY(y)
+				$("<div>").css({"background-color":color,"position":"absolute","width":mp_radius*2+"px","height":mp_radius*2+"px","left":canv_x+"px","top":canv_y+"px"}).attr({"data-toggle":"tooltip","data-placement":"bottom","title":"MP("+x+", "+y+")"}).appendTo(canvas)
+				//ctx.fillRect(canv_x,canv_y,canv_x+mp_radius*2,canv_y+mp_radius*2)
+			}
+			for (let j = 0; j < ncond.length;j++){
+				let xf = translateX(ncond[j].x1)
+				let xl = translateX(ncond[j].x2)
+				let yf = translateY(ncond[j].y1)
+				let yl = translateY(ncond[j].y2)
+				let width = xf==xl ? mp_radius*2 : Math.abs(xf-xl)
+				let height = yf==yl ? mp_radius*2 : Math.abs(yf-yl)
+				let left = xf==xl ? xf : Math.min(xf,xl)
+				let right = yf==yl ? yf : Math.min(yf,yl)
+				$("<div>").css({"background-color":"#8973a8","position":"absolute","width":width+"px","height":height+"px","left":left+"px","top":right+"px"}).attr({"data-toggle":"tooltip","data-placement":"bottom","title":"境界条件 ("+ncond[j].x1+", "+ncond[j].y1+" - "+ncond[j].x2+", "+ncond[j].y2+"), "+ncond[j].xfix+", "+ncond[j].yfix}).appendTo(canvas)
+			}
+			$('[data-toggle="tooltip"]').tooltip()
+		}
+		
+		function isLeftNeighbor(x,y,x1,y1){
+			return x <= x1 && x1 <= x+boxWidth && y-boxWidth/2 <= y1 && y1 <= y+boxWidth/2
+		}
+		function isRightNeighbor(x,y,x1,y1){
+			return x-boxWidth <= x1 && x1 <= x && y-boxWidth/2 <= y1 && y1 <= y+boxWidth/2
+		}
+		function isUpNeighbor(x,y,x1,y1){
+			return y <= y1 && y1 <= y+boxWidth && x-boxWidth/2 <= x1 && x1 <= x+boxWidth/2
+		}
+		function isDownNeighbor(x,y,x1,y1){
+			return y-boxWidth <= y1 && y1 <= y && x-boxWidth/2 <= x1 && x1 <= x+boxWidth/2
+		}
+		
+		function translateX(x){
+			let ratio = canvasWidth/(getMaxX() - getMinX())
+			return Math.round(x * ratio)
+		}
+		function translateY(y){
+			let ratio = canvasWidth/(getMaxX() - getMinX())
+			let height = (getMaxY() - getMinY()) * ratio
+			return Math.round(height - y * ratio)
+		}
+		
+		
+		function getMaxX(){
+			let max = -100000 
+			for (let i = 0; i < MPtree.length;i++){
+				max = Math.max(MPtree[i].x, max)
+			}
+			return max
+		}
+		function getMaxY(){
+			let max = -100000
+			for (let i = 0; i < MPtree.length;i++){
+				max = Math.max(MPtree[i].y, max)
+			}
+			return max
+		}
+		function getMinX(){
+			let min = 100000 
+			for (let i = 0; i < MPtree.length;i++){
+				min = Math.min(MPtree[i].x, min)
+			}
+			return min
+		}
+		function getMinY(){
+			let min = 100000 
+			for (let i = 0; i < MPtree.length;i++){
+				min = Math.min(MPtree[i].y, min)
+			}
+			return min
+		}
+		
+		/*function addRect(x1,y1,x2,y2){
+			let aspect_ratio = Math.abs(y2-y1) / Math.abs(x2-x1) // 9/16
+			//let width = Math.round($(window).width()*0.3)
+			let width = 400
+			let height = Math.round(width * aspect_ratio)
+			if (parseInt($(canvas).attr("height")) < height) {
+				$(canvas).attr("height", height+100)
+			}
+			if (parseInt($(canvas).attr("width")) < width) {
+				$(canvas).attr("width", width+100)
+			}
+			let canvX1 = x1//TODO
+			ctx.strokeStyle = color_list[color_index % color_list.length]
+			ctx.lineWidth = 2
+			ctx.strokeRect(50, 50, width, height)
+			ctx.fillStyle = color_fill_list[color_index % color_list.length]
+			ctx.fillRect(51,51,width-2,height-2)
+			color_index++
+		}*/
+		
+		function clearCanvas(){
+			$(canvas).html("")
+		}
+		
+		
+		function saveAsFile(filename, content){
+			var file = new Blob([content], {type: 'text/plane;'});
+			if (typeof window.navigator.msSaveOrOpenBlob === "undifined") {
+				window.navigator.msSaveOrOpenBlob(file, filename);
+			} else {
+				var a = document.createElement('a');
+				var url = URL.createObjectURL(file);
+				a.href = url;
+				a.download = filename;
+				document.body.appendChild(a);
+				a.click();
+				setTimeout(() =>  {
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);  
+				}, 0); 
+			}
+		}
+		
+		var ncond = []
+		
+		function addNCOND(x1,y1,x2,y2,fix){
+			ncond.push({
+				"x1":x1,
+				"y1":y1,
+				"x2":x2,
+				"y2":y2,
+				"xfix":(fix==="sncond_x"||fix==="sncond_xy")?1:0,
+				"yfix":(fix==="sncond_y"||fix==="sncond_xy")?1:0
+			})
+		}
+		
+		function convertNcond(){
+			let content = ""
+			for (let i = 0; i < ncond.length; i++){
+				let x1 = ncond[i].x1
+				let y1 = ncond[i].y1
+				let x2 = ncond[i].x2
+				let y2 = ncond[i].y2
+				let xfix = ncond[i].xfix
+				let yfix = ncond[i].yfix
+				let ix1 = indentify_float(x1,5,10)
+				let iy1 = indentify_float(y1,5,10)
+				let ix2 = indentify_float(x2,5,10)
+				let iy2 = indentify_float(y2,5,10)
+				let ixfix = indentify_int(xfix,5)
+				let iyfix = indentify_int(yfix,5)
+				let line = ix1+ix2+iy1+iy2+ixfix+iyfix+"\n"
+				content += line
+			}
+			$("#filecontent_sncond").text(content)
+		}
+	</script>
+</body>
+</html>
