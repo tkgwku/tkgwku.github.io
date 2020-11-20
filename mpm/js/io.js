@@ -9,7 +9,8 @@ function indentify_int(n, indent){
 }
 
 function indentify_float(n, k, indent){
-	let s = n+""
+	let _n = Math.round(n*(10**k))/(10**k)
+	let s = _n+""
 	let _s = s.split(".")
 	if (_s.length > 2) console.error("_s.length > 2")
 	if (_s.length === 2){

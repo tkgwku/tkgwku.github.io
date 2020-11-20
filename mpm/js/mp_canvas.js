@@ -8,17 +8,20 @@ const radius_list = [1,2,3,4,5,8,10,20]
 var mp_radius = 2
 
 function drawRect(){
+	return//
 	clearCanvas()
 	let ratio = canvasWidth/(getMaxX() - getMinX())
 	$(canvas).attr("min-height", Math.round((getMaxY() - getMinY()) * ratio))
 	$("#MPbackground").css({"min-height":Math.round((getMaxY() - getMinY()) * ratio)+50+"px"})
-    $(canvas).attr("width", canvasWidth)
-    let div = $('<div>')
-	for (let i = 0; i < MPtree.length;i++){
-		let id = MPtree[i].id
-		let x = MPtree[i].x
-		let y = MPtree[i].y
-		let mm = MPtree[i].mm
+	$(canvas).attr("width", canvasWidth)
+	let div = $('<div>')
+	let keys = Object.keys(mptree)
+	for (let i = 0; i < keys.length;i++){
+		let mp_val = mptree[keys[i]]
+		let id = mp_val.id
+		let x = mp_val.pos.x
+		let y = mp_val.pos.y
+		let mm = mp_val.mm
 		let color = color_list[(mm % color_list.length)]
 		
 		let l = false
@@ -26,21 +29,25 @@ function drawRect(){
 		let u = false
 		let d = false
 		
-		for (let j = 0; j < MPtree.length;j++){
-			let x1 = MPtree[j].x
-			let y1 = MPtree[j].y
-			if (mm === MPtree[j].mm){
-				if (id !== MPtree[j].id){
-					if (!l && isLeftNeighbor(x,y,x1,y1)){
+		let keys2 = Object.keys(mptree)
+		for (let j = 0; j < keys2.length;j++){
+			let mp_val2 = mptree[keys2[i]]
+			let id2 = mp_val2.id
+			if (id !== id2){
+				let x2 = mp_val2.pos.x
+				let y2 = mp_val2.pos.y
+				let mm2 = mp_val2.mm
+				if (mm === mm2){
+					if (!l && isLeftNeighbor(x,y,x2,y2)){
 						l = true
 					}
-					if (!r && isRightNeighbor(x,y,x1,y1)){
+					if (!r && isRightNeighbor(x,y,x2,y2)){
 						r = true
 					}
-					if (!u && isUpNeighbor(x,y,x1,y1)){
+					if (!u && isUpNeighbor(x,y,x2,y2)){
 						u = true
 					}
-					if (!d && isDownNeighbor(x,y,x1,y1)){
+					if (!d && isDownNeighbor(x,y,x2,y2)){
 						d = true
 					}
 					if (l && r && u && d){
@@ -66,35 +73,35 @@ function drawRect(){
                 "title":"MP("+x+", "+y+")"})
             .appendTo(div)
 	}
-	for (let j = 0; j < ncond.length;j++){
-		let xf = translateX(ncond[j].x1)
-		let xl = translateX(ncond[j].x2)
-		let yf = translateY(ncond[j].y1)
-		let yl = translateY(ncond[j].y2)
+	for (let j = 0; j < boundarray.length;j++){
+		let xf = translateX(boundarray[j].pos1.x)
+		let xl = translateX(boundarray[j].pos2.x)
+		let yf = translateY(boundarray[j].pos1.y)
+		let yl = translateY(boundarray[j].pos2.y)
 		let width = xf==xl ? mp_radius : Math.abs(xf-xl)
 		let height = yf==yl ? mp_radius : Math.abs(yf-yl)
 		let left = xf==xl ? xf : Math.min(xf,xl)
 		let right = yf==yl ? yf : Math.min(yf,yl)
-        $("<div>")
-            .css({
-                "background-color":"#8973a8",
-                "position":"absolute",
-                "width":width+"px",
-                "height":height+"px",
-                "left":left+"px",
-                "top":right+"px"})
-            .attr({
-                "data-toggle":"tooltip",
-                "data-placement":"bottom",
-                "title":"境界条件 ("+ncond[j].x1+", "+ncond[j].y1+" - "+ncond[j].x2+", "+ncond[j].y2+"), "+ncond[j].xfix+", "+ncond[j].yfix})
-            .appendTo(div)
-    }
-    div.appendTo($(canvas))
+		$("<div>")
+			.css({
+				"background-color":"#8973a8",
+				"position":"absolute",
+				"width":width+"px",
+				"height":height+"px",
+				"left":left+"px",
+				"top":right+"px"})
+			.attr({
+				"data-toggle":"tooltip",
+				"data-placement":"bottom",
+				"title":"境界条件 ("+ncond[j].x1+", "+ncond[j].y1+" - "+ncond[j].x2+", "+ncond[j].y2+"), "+ncond[j].xfix+", "+ncond[j].yfix})
+			.appendTo(div)
+	}
+	div.appendTo($(canvas))
 	$('[data-toggle="tooltip"]').tooltip()
 }
 
 function setRadius(i){
-    mp_radius = radius_list[i]
+	mp_radius = radius_list[i]
 	$("#mpRadiusPx").text(mp_radius+"")
 }
 
@@ -125,29 +132,33 @@ function translateY(y){
 
 function getMaxX(){
 	let max = -100000 
-	for (let i = 0; i < MPtree.length;i++){
-		max = Math.max(MPtree[i].x, max)
+	let keys = Object.keys(mptree)
+	for (let i = 0; i < keys.length;i++){
+		max = Math.max(mptree[keys[i]].pos.x, max)
 	}
 	return max
 }
 function getMaxY(){
 	let max = -100000
-	for (let i = 0; i < MPtree.length;i++){
-		max = Math.max(MPtree[i].y, max)
+	let keys = Object.keys(mptree)
+	for (let i = 0; i < keys.length;i++){
+		max = Math.max(mptree[keys[i]].pos.y, max)
 	}
 	return max
 }
 function getMinX(){
 	let min = 100000 
-	for (let i = 0; i < MPtree.length;i++){
-		min = Math.min(MPtree[i].x, min)
+	let keys = Object.keys(mptree)
+	for (let i = 0; i < keys.length;i++){
+		max = Math.min(mptree[keys[i]].pos.x, min)
 	}
 	return min
 }
 function getMinY(){
-	let min = 100000 
-	for (let i = 0; i < MPtree.length;i++){
-		min = Math.min(MPtree[i].y, min)
+	let min = 100000
+	let keys = Object.keys(mptree)
+	for (let i = 0; i < keys.length;i++){
+		max = Math.min(mptree[keys[i]].pos.y, min)
 	}
 	return min
 }
