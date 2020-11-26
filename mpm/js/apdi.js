@@ -391,6 +391,29 @@ function convertInputAPDI(){
 		let id = vertex_val.id
 		let x = vertex_val.pos.x
 		let y = vertex_val.pos.y
+		
+		let _bggw = $("#pref_grid").val()
+		let _bgx = $("#pref_x").val()
+		let _bgy = $("#pref_y").val()
+		if (_bggw !== "" && _bgx !== "" && _bgy !== ""){
+			let background_grid_w = parseFloat(_bggw)
+			let background_x = parseFloat(_bgx)
+			let background_y = parseFloat(_bgy)
+			if (!isNaN(background_grid_w) && !isNaN(background_x) && !isNaN(background_y)){
+				let danger_x = background_x - background_grid_w
+				let danger_y = background_y - background_grid_w
+				if (x === danger_x){
+					x = x - 0.00001
+				}
+				if (y === danger_y){
+					y = y - 0.00001
+				}
+				if (x > danger_x || y > danger_y){
+					push_alert("頂点が計算領域の外側にいる可能性があります.", 2)
+				}
+			}
+		}
+		
 		let iid = indentify_int(id,10)
 		let ix = indentify_float(x,5,10)
 		let iy = indentify_float(y,5,10)
@@ -400,16 +423,23 @@ function convertInputAPDI(){
 	content += "# APDI ELEMENT DEF\n"
 	content += "# id, mpID, vertex1, vertex2, vertex3, vertex4\n"
 	let aa = getArrangedAPDIArray()
+	let new_apditree = {};
 	let mp_id_map = getMP_idMap()
 	content += "num elements="+aa.length+"\n"
 	for (let i = 0; i < aa.length; i++){
 		let apdi_val = aa[i]
 		let id = apdi_val.id
 		let mpid = mp_id_map[apdi_val.mp.pos.toString()]
-		let v1id = vertextree[apdi_val.v1.pos.toString()].id
-		let v2id = vertextree[apdi_val.v2.pos.toString()].id
-		let v3id = vertextree[apdi_val.v3.pos.toString()].id
-		let v4id = vertextree[apdi_val.v4.pos.toString()].id
+		let v1 = vertextree[apdi_val.v1.pos.toString()]
+		let v2 = vertextree[apdi_val.v2.pos.toString()]
+		let v3 = vertextree[apdi_val.v3.pos.toString()]
+		let v4 = vertextree[apdi_val.v4.pos.toString()]
+		let rearranged = vertexRearrange(v1,v2,v3,v4)
+		new_apditree[apdi_val.mp.pos.toString()] = new APDI(apdi_val.mp,rearranged[0],rearranged[1],rearranged[2],rearranged[3])
+		let v1id = rearranged[0].id
+		let v2id = rearranged[1].id
+		let v3id = rearranged[2].id
+		let v4id = rearranged[3].id
 		let iid = indentify_int(id,10)
 		let impid = indentify_int(mpid,10)
 		let iv1id = indentify_int(v1id,10)
@@ -418,6 +448,7 @@ function convertInputAPDI(){
 		let iv4id = indentify_int(v4id,10)
 		content += iid+impid+iv1id+iv2id+iv3id+iv4id+"\n"
 	}
+	apditree = new_apditree
 	content += "#################\n"
 	$("#filecontent_apdi").text(content)
 }
@@ -478,4 +509,68 @@ function getArrangedVertexArray(){
 
 function removeHorizontalAPDIBuffer(mm,x1,y1,x2,y2,width_top,width_bottom){
 	
+}
+
+function vertexRearrange(v1,v2,v3,v4){
+	let nv1 = v1
+	let nv2 = v2
+	let nv3 = v3
+	let nv4 = v4
+	
+	let x1 = v1.pos.x
+	let x2 = v2.pos.x
+	let x3 = v3.pos.x
+	let x4 = v4.pos.x
+	let y1 = v1.pos.y
+	let y2 = v2.pos.y
+	let y3 = v3.pos.y
+	let y4 = v4.pos.y
+	
+	let ux = x2 - x1  // 4 .              . 3
+	let uy = y2 - y1  //   ↑           ➚ 
+	let vx = x3 - x1  // w |     v  ／
+	let vy = y3 - y1  //   |     ／
+	let wx = x4 - x1  //   |  ／   u
+	let wy = y4 - y1  // 1 . -----------→ . 2
+	
+	let op1 = ux * vy - uy * vx // u × v > 0
+	let op2 = vx * wy - vy * wx // v × w > 0
+	let op3 = ux * wy - uy * wx // u × w > 0
+	
+	if (op1 < 0) {
+		if (op2 < 0) {
+			nv2 = v4 // u v   2 3  <-  4 3
+			nv4 = v2 // 0 w   1 4  <-  1 2
+		} else {
+			// uw v
+			// 0   
+			if (op3 < 0) {
+				nv2 = v3 // u w   2 4  <-  4 3
+				nv3 = v4 // 0 v   1 3  <-  1 2
+				nv4 = v2 
+			} else {
+				nv2 = v3 // w u   4 2  <-  4 3
+				nv3 = v2 // 0 v   1 3  <-  1 2
+				nv4 = v4 
+			}
+		}
+	} else {
+		if (op2 < 0) {
+			// v uw
+			// 0  
+			if (op3 > 0) {
+				nv3 = v4 // v w   3 4  <-  4 3
+				nv4 = v3 // 0 u   1 2  <-  1 2
+			} else {
+				nv2 = v4 // v u   3 2  <-  4 3
+				nv3 = v2 // 0 w   1 4  <-  1 2
+				nv4 = v3
+			}
+		} else {
+			// w v
+			// 0 u
+			//do nothing
+		}
+	}
+	return [nv1,nv2,nv3,nv4]
 }

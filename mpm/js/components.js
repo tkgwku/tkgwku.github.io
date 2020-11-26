@@ -4,6 +4,7 @@
  * copyright; github.com@tkgwku, all rights reserved.
  */
 
+var reso = 0.1
 var mptree = {}
 var apditree = {}
 var vertextree = {}
@@ -56,7 +57,10 @@ function Pos(x,y){
 	this.y = y
 }
 Pos.prototype.toString = function(){
-	return "(" + this.x + "," + this.y + ")"
+	let r = Math.round(1000/reso)
+	let _x = Math.round(this.x*r)/r
+	let _y = Math.round(this.y*r)/r
+	return "(" + _x + "," + _y + ")"
 }
 
 function Boundary(pos1, pos2, xfix, yfix){
