@@ -36,7 +36,7 @@ in vec3 rp;
 void main() {
   if (dot(ec, rp-rs) > 0.0){
     float k = dot(ec, rs-cam)/dot(ec, rp-cam);
-    gl_PointSize = radius * k
+    gl_PointSize = radius * k;
     vec3 X = ((1.0-k) * cam) + k * rp - rs;
     gl_Position = vec4(width/2.0 + zc* dot(X, e_xi), height/2 + zc* dot(X, e_eta), length(rs-rp), 1.0);
   }
