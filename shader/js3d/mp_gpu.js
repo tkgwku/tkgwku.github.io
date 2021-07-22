@@ -1,4 +1,6 @@
-var gl, programInfo, buffers, texture
+var gl, programInfo, buffers, texture;
+var img = new Image();
+img.src = 'js3d/texture.png';
 
 function main(){
     if (!mps) return;
@@ -76,6 +78,9 @@ function main(){
 
         void main(void) {
             vec4 smpColor = texture2D(uTexture, gl_PointCoord);
+            if (smpColor.w == 0.0){
+                discard;
+            }
             gl_FragColor = vColor * smpColor;
         }
     `;
@@ -112,8 +117,19 @@ function main(){
 	// ブレンドファクター
 	gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE);
 
-	texture = null;
-	create_texture('js3d/texture.png');
+    // テクスチャオブジェクトの生成
+    let tex = gl.createTexture();
+    // テクスチャをバインドする
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    // テクスチャへイメージを適用
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+    // ミップマップを生成
+    gl.generateMipmap(gl.TEXTURE_2D);
+    // テクスチャのバインドを無効化
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    
+    // 生成したテクスチャを変数に代入
+    texture = tex;
 
     drawScene();
 }
@@ -172,35 +188,6 @@ function initBuffers(gl) {
     return {
         position: positionBuffer,
     };
-}
-// テクスチャを生成する関数
-function create_texture(source){
-    // イメージオブジェクトの生成
-    var img = new Image();
-    
-    // データのオンロードをトリガーにする
-    img.onload = function(){
-        // テクスチャオブジェクトの生成
-        var tex = gl.createTexture();
-        
-        // テクスチャをバインドする
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        
-        // テクスチャへイメージを適用
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-        
-        // ミップマップを生成
-        gl.generateMipmap(gl.TEXTURE_2D);
-        
-        // テクスチャのバインドを無効化
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        
-        // 生成したテクスチャを変数に代入
-        texture = tex;
-    };
-    
-    // イメージオブジェクトのソースを指定
-    img.src = source;
 }
 function drawScene() {
     gl.clearColor(0.0, 0.0, 0.0, 0.0);  // Clear to black, fully opaque
