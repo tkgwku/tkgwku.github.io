@@ -29,9 +29,7 @@ uniform float height;
 
 // Particle Pos
 in vec3 rp;
-in float val;
 
-varying float vColor;
 //
 // メイン処理
 //
@@ -41,11 +39,5 @@ void main() {
     gl_PointSize = radius * k;
     vec3 X = ((1.0-k) * cam) + k * rp - rs;
     gl_Position = vec4(width/2.0 + zc* dot(X, e_xi), height/2.0 + zc* dot(X, e_eta), length(rs-rp), 1.0);
-    //209, 79, 65 ~ 67, 65, 209 Linear gradient
-    vec3 red = vec3(0.82,0.31,0.255);
-    vec3 blue = vec3(0.255​,0.82,0.263);
-    vColor = vec4( (blue-red)*(val-1.0)+red, 1.0);
-  } else {
-    vColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
 }

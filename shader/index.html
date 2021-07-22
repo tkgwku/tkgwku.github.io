@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>MPM-APDIインプット作成</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+	<style>
+		#alert{position:fixed;bottom:1em;left:1em}
+		#mp{background-color:transparent}
+		.cursor{cursor:pointer}
+		#mp{font-family:monospace;font-size:.7em;min-height:7em}
+	</style>
+</head>
+<body class="darkmode">
+	<div class="container pb-4">
+		<h1 class="mt-4 mb-4">3D インプット作成 v1.0</h1>
+		<div class="alert" id="alert" hidden>
+			<strong>[Error]</strong> <span id="alert_text"></span>
+			<button type="button" class="btn-close" id="alert_close"></button>
+		</div>
+		<div class="row">
+			<div class="col">
+				<div class="input-group">
+					<label class="input-group-text" for="mode">モード</label>
+					<select class="form-select" id="mode">
+						<option selected value="1">粒子追加 - 格子指定 (G)</option>
+						<option value="2">粒子追加 - 等間隔粒子 (P)</option>
+						<option value="3">粒子追加 - 成層地盤 (H)</option>
+						<option value="4">APDI 等幅メッシュ (A)</option>
+						<option value="5">APDI 倍化メッシュ (D)</option>
+						<option value="6">境界条件 (B)</option>
+					</select>
+				</div>
+			</div>
+			<div class="col">
+				<div class="input-group">
+					<label class="input-group-text" for="hisotry">履歴から</label>
+					<select class="form-select" id="history"></select>
+				</div>
+			</div>
+		</div>
+		
+		<div class="mt-2 mb-2">
+			&emsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+				<path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+			</svg>
+		</div>
+		
+		<div class="row">
+			<div class="col">
+				<div class="input-group mb-1">
+					<span class="input-group-text">材料番号</span>
+					<input type="text" class="form-control" placeholder="例： 1" id="mm" data-show="gphad">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">格子幅</span>
+					<input type="text" class="form-control" placeholder="例： 0.1" id="width" data-show="gh">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">格子内個数</span>
+					<input type="text" class="form-control" placeholder="例： 4" id="ppg" data-show="gh">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">粒子間隔</span>
+					<input type="text" class="form-control" placeholder="例： 0.1" id="dx" data-show="p">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">要素幅</span>
+					<input type="text" class="form-control" placeholder="例： 0.1" id="apdiwidth" data-show="a">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">方向</span>
+					<select class="form-select" id="direction" data-show="d">
+						<option selected value="x">X方向に2倍</option>
+						<option value="y">Y方向に2倍</option>
+						<option value="z">Z方向に2倍</option>
+						<option value="-x">X方向に1/2</option>
+						<option value="-y">Y方向に1/2</option>
+						<option value="-z">Z方向に1/2</option>
+					</select>
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">基本要素幅</span>
+					<input type="text" class="form-control" placeholder="例： 0.1" id="widthbefore" data-show="d">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">X固定</span>
+					<label class="input-group-text cursor">
+						<input class="form-check-input mt-0 cursor" type="checkbox" id="xfix_c" value="">
+					</label>
+					<input type="text" class="form-control" placeholder="例： 1" id="xfix" data-show="b">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Y固定</span>
+					<label class="input-group-text cursor">
+						<input class="form-check-input mt-0 cursor" type="checkbox" id="yfix_c" value="">
+					</label>
+					<input type="text" class="form-control" placeholder="例： 1" id="yfix" data-show="b">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Z固定</span>
+					<label class="input-group-text cursor">
+						<input class="form-check-input mt-0 cursor" type="checkbox" id="zfix_c" value="">
+					</label>
+					<input type="text" class="form-control" placeholder="例： 0" id="zfix" data-show="b">
+				</div>
+				<div class="mb-1 text-muted">
+					<span data-show="b">XYZのうちどの方向を固定するか指定．</span>
+				</div>
+			</div>
+			<div class="col">
+				<div class="input-group mb-1">
+					<span class="input-group-text">X</span>
+					<input type="text" class="form-control" placeholder="例： 0.1" id="x1" data-show="gpbad">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Y</span>
+					<input type="text" class="form-control" placeholder="例： 0.1" id="y1" data-show="gpbad">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Z</span>
+					<input type="text" class="form-control" placeholder="例： 0.1" id="z1" data-show="gpbad">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Len X</span>
+					<input type="text" class="form-control" placeholder="例： 10.1" id="lenx" data-show="h">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Len Y</span>
+					<input type="text" class="form-control" placeholder="例： 5.1" id="leny" data-show="h">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Len Z</span>
+					<input type="text" class="form-control" placeholder="例： 5.1" id="lenz" data-show="h">
+				</div>
+				<div class="mb-1 text-muted">
+					<span data-show="gpbad">始点のXYZ座標．</span>
+				</div>
+			</div>
+			<div class="col">
+				<div class="input-group mb-1">
+					<span class="input-group-text">X</span>
+					<input type="text" class="form-control" placeholder="例： 10.1" id="x2" data-show="gpad">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Y</span>
+					<input type="text" class="form-control" placeholder="例： 5.1" id="y2" data-show="gpad">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Z</span>
+					<input type="text" class="form-control" placeholder="例： 5.1" id="z2" data-show="gpad">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">地盤高さ</span>
+					<input type="text" class="form-control" placeholder="例： 4.0" id="height" data-show="h">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">X</span>
+					<label class="input-group-text cursor">
+						<input class="form-check-input mt-0 cursor" type="radio" value="x" name="border_radio" checked>
+					</label>
+					<input type="text" class="form-control" placeholder="例： 10.1" id="bx" data-show="b">
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Y</span>
+					<label class="input-group-text cursor">
+						<input class="form-check-input mt-0 cursor" type="radio" value="y" name="border_radio">
+					</label>
+					<input type="text" class="form-control" placeholder="例： 5.1" id="by" data-show="b" disabled>
+				</div>
+				<div class="input-group mb-1">
+					<span class="input-group-text">Z</span>
+					<label class="input-group-text cursor">
+						<input class="form-check-input mt-0 cursor" type="radio" value="z" name="border_radio">
+					</label>
+					<input type="text" class="form-control" placeholder="例： 5.1" id="bz" data-show="b" disabled>
+				</div>
+				<div class="mb-1 text-muted">
+					<span data-show="b">終点のXYZ座標．XかYかZは始点と同じ値でなければならない．※一致する座標を選択．</span>
+				</div>
+				<div class="mb-1 text-muted">
+					<span data-show="gpad">終点のXYZ座標．</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="mt-2 mb-2">
+			&emsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+				<path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+			</svg>
+		</div>
+		
+		<div class="mt-2 mb-1">
+			<button type="button" class="btn btn-success" id="add">追加</button>
+			<button type="button" class="btn btn-outline-secondary ml-3" id="clear">クリア</button>
+		</div>
+		
+		<div class="mt-2 mb-2">
+			&emsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+				<path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+			</svg>
+		</div>
+		
+		<div class="row">
+			<div class="col">
+				<div class="input-group">
+					<span class="input-group-text">結果</span>
+					<textarea class="form-control" readonly placeholder="ファイル内容はここに表示されます" id="mp"></textarea>
+				</div>
+			</div>
+		</div>
+		
+		<div class="mt-2 mb-2">
+			&emsp;<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+				<path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1z"/>
+			</svg>
+		</div>
+
+		<div class="mt-2 mb-1">
+			<button type="button" class="btn btn-success" id="savemp">保存</button>
+			<button type="button" class="btn btn-outline-secondary ml-3" id="clear_textarea">クリア</button>
+		</div>
+	</div>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/encoding-japanese/1.0.30/encoding.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+
+	<script src="js/component.js"></script>
+	<script src="js/io.js"></script>
+	<script type="text/javascript">
+		//history item
+		var item = []
+		
+		$(function(){
+			$("#history").on("change", function(e){
+				const val = this.value
+				if (val !== ""){
+					const arr = JSON.parse(val)
+					use_history(arr)
+				}
+			})
+			$("#savemp").on("click", function(){
+				saveAsFile("input_mp.dat", $("#mp").text())
+			})
+			$("#clear_textarea").on("click", function(){
+				if (window.confirm("本当にtextarea内のデータをクリアしてもよろしいですか？")){
+					$("#mp").text("")
+				}
+			})
+			$("#alert_close").on("click", function(){
+				$("#alert").attr("hidden", "")
+			})
+			$("#mode").on("change", function(ev){
+				const mode = (["g","p","h","a","d","b"])[parseInt($(ev.target).val())-1]
+				$("[data-show]").each(function (i, elem){
+					if ((new RegExp(mode)).test($(elem).data("show"))){
+						$(elem).parent().removeAttr("hidden")
+					} else {
+						$(elem).parent().attr("hidden", "")
+					}
+				})
+			})
+			$("#add").on("click", function(){
+				const mode  = parseInt  ($("#mode")  .val())
+				const mm    = parseInt  ($("#mm")    .val())
+				const x1    = parseFloat($("#x1")    .val())
+				const y1    = parseFloat($("#y1")    .val())
+				const z1    = parseFloat($("#z1")    .val())
+				const x2    = parseFloat($("#x2")    .val())
+				const y2    = parseFloat($("#y2")    .val())
+				const z2    = parseFloat($("#z2")    .val())
+				const ppg   = parseInt  ($("#ppg")   .val())
+				const lenx  = parseFloat($("#lenx")  .val())
+				const leny  = parseFloat($("#leny")  .val())
+				const lenz  = parseFloat($("#lenz")  .val())
+				const width = parseFloat($("#width") .val())
+				const dx    = parseFloat($("#dx")    .val())
+				const height= parseFloat($("#height").val())
+				
+				add(mode, mm, x1, y1, z1, x2, y2, z2, ppg, lenx, leny, lenz, width, dx, height)
+			})
+			$("#clear").on("click", function(){
+				if (window.confirm("フォーム内容をクリアしてよろしいですか？")){
+					$("[data-show]").each(function (i, elem){
+						if (!$(elem).parent()[0].hasAttribute("hidden")){
+							$(elem).val("")
+						}
+					})
+				}
+			})
+			$("input[name='border_radio']").on("change", function(ev){
+				$("input[name='border_radio']").parent().next().removeAttr("disabled")
+				if ($(ev.target).prop("checked")){
+					$(ev.target).parent().next().attr("disabled", "")
+					localStorage.setItem("border_radio", $(ev.target).val())
+				}
+			})
+			$("#xfix").on("change keyup", function(ev){
+				const cnux = $(ev.target).val()
+				if (cnux === "1" ) {
+					$("#xfix_c").prop("checked", true)
+					localStorage.setItem("xfix", "1")
+					localStorage.setItem("xfix_c", "1")
+				} else if ($("#xfix_c").prop("checked")){
+					$("#xfix_c").prop("checked", false)
+					localStorage.setItem("xfix", "0")
+					localStorage.setItem("xfix_c", "0")
+				}
+			})
+			$("#yfix").on("change keyup", function(ev){
+				const cnuy = $(ev.target).val()
+				if (cnuy === "1" ) {
+					$("#yfix_c").prop("checked", true)
+					localStorage.setItem("yfix", "1")
+					localStorage.setItem("yfix_c", "1")
+				} else if ($("#yfix_c").prop("checked")){
+					$("#yfix_c").prop("checked", false)
+					localStorage.setItem("yfix", "0")
+					localStorage.setItem("yfix_c", "0")
+				}
+			})
+			$("#zfix").on("change keyup", function(ev){
+				const cnuz = $(ev.target).val()
+				if (cnuz === "1" ) {
+					$("#zfix_c").prop("checked", true)
+					localStorage.setItem("zfix", "1")
+					localStorage.setItem("zfix_c", "1")
+				} else if ($("#zfix_c").prop("checked")){
+					$("#zfix_c").prop("checked", false)
+					localStorage.setItem("zfix", "0")
+					localStorage.setItem("zfix_c", "0")
+				}
+			})
+			$("#xfix_c").on("change", function(ev){
+				if ($(ev.target).prop("checked")){
+					$("#xfix").val("1")
+					localStorage.setItem("xfix", "1")
+					localStorage.setItem("xfix_c", "1")
+				} else {
+					$("#xfix").val("0")
+					localStorage.setItem("xfix", "0")
+					localStorage.setItem("xfix_c", "0")
+				}
+			})
+			$("#yfix_c").on("change", function(ev){
+				if ($(ev.target).prop("checked")){
+					$("#yfix").val("1")
+					localStorage.setItem("yfix", "1")
+					localStorage.setItem("yfix_c", "1")
+				} else {
+					$("#yfix").val("0")
+					localStorage.setItem("yfix", "0")
+					localStorage.setItem("yfix_c", "0")
+				}
+			})
+			$("#zfix_c").on("change", function(ev){
+				if ($(ev.target).prop("checked")){
+					$("#zfix").val("1")
+					localStorage.setItem("zfix", "1")
+					localStorage.setItem("zfix_c", "1")
+				} else {
+					$("#zfix").val("0")
+					localStorage.setItem("zfix", "0")
+					localStorage.setItem("zfix_c", "0")
+				}
+			})
+			
+			initLS()
+			load_history()
+		})
+		
+		function add(mode, mm, x1, y1, z1, x2, y2, z2, ppg, lenx, leny, lenz, width, dx, height){
+			if (mode === 1){//grid
+				const use_para = [mode, mm, x1, y1, z1, x2, y2, z2, ppg, width]
+				if (isNaN(use_para.reduce((a,b)=>a+b))){
+					alertbox("数値に誤りがあります．", 2)
+					return
+				}
+				add_history(use_para)
+				
+				const pqr = Math.round(Math.pow(ppg, 1/3))
+				const x3 = Math.min(x1,x2)
+				const numMPX = Math.round(pqr*(Math.max(x1,x2)-x3)/width)
+				const y3 = Math.min(y1,y2)
+				const numMPY = Math.round(pqr*(Math.max(y1,y2)-y3)/width)
+				const z3 = Math.min(z1,z2)
+				const numMPZ = Math.round(pqr*(Math.max(z1,z2)-z3)/width)
+				const numMP = numMPX * numMPY * numMPZ
+				const interval = width/pqr
+				for (let p = 0; p < numMP; p++){
+					const i = p % (numMPX)
+					const j = (p-i)/numMPX % (numMPY)
+					const k = (p-i-numMPX*j)/(numMPX*numMPY)
+					const xp = x3 + 0.5*interval + i*interval
+					const yp = y3 + 0.5*interval + j*interval
+					const zp = z3 + 0.5*interval + k*interval
+					const pos = new Pos(xp,yp,zp)
+					const mp = new MP(mm, pos)
+					mp.addToMPTree()
+				}
+				refresh()
+			} else if (mode === 2){//mp
+				const use_para = [mode, mm, x1, y1, z1, x2, y2, z2, dx]
+				if (isNaN(use_para.reduce((a,b)=>a+b))){
+					alertbox("数値に誤りがあります．", 2)
+					return
+				}
+				add_history(use_para)
+				
+				const x3 = Math.min(x1,x2)
+				const x4 = Math.max(x1,x2)
+				const y3 = Math.min(y1,y2)
+				const y4 = Math.max(y1,y2)
+				const z3 = Math.min(z1,z2)
+				const z4 = Math.max(z1,z2)
+
+				let prom = new Promise(function(resolve, reject){
+					for (let i = 0; i < (x4-x3)/dx; i++){
+						for (let j = 0; j < (y4-y3)/dx; j++){
+							for (let k = 0; k < (z4-z3)/dx; k++){
+								const xp = x3 + i*dx
+								const yp = y3 + j*dx
+								const zp = z3 + k*dx
+								const pos = new Pos(xp,yp,zp)
+								const mp = new MP(mm, pos)
+								mp.addToMPTree()
+							}
+						}
+					}
+					refresh()
+					resolve()
+				})
+				
+			} else if (mode === 3){//horizontal layered
+				const use_para = [mode, mm, lenx, leny, ppg, width, height]
+				if (isNaN(use_para.reduce((a,b)=>a+b))){
+					alertbox("数値に誤りがあります．", 2)
+					return
+				}
+				add_history(use_para)
+				
+				const x3 = width
+				const x4 = lenx-2*width
+				const y3 = width
+				const y4 = leny-2*width
+				const z3 = width
+				const z4 = height+width
+				const pqr = Math.round(Math.pow(ppg, 1/3))
+
+				let prom = new Promise(function(resolve, reject){
+					for (let i = 0; i < (x4-x3)/width; i++){
+						for (let j = 0; j < (y4-y3)/width; j++){
+							for (let k = 0; k < (z4-z3)/width; k++){
+								for (let p = 0; p < pqr; p++){
+									for (let q = 0; q < pqr; q++){
+										for (let r = 0; r < pqr; r++){
+											const xp = x3 + i*width + (0.5+p)*width/pqr
+											const yp = y3 + j*width + (0.5+q)*width/pqr
+											const zp = z3 + k*width + (0.5+r)*width/pqr
+											const pos = new Pos(xp,yp,zp)
+											const mp = new MP(mm, pos)
+											mp.addToMPTree()
+										}
+									}
+								}
+							}
+						}
+					}
+					refresh()
+					resolve()
+				})
+				
+			}
+		}
+		
+		function refresh(){
+			let content = ""
+			let keys = Object.keys(mps)
+			for (let i = 0; i < keys.length; i++){
+				content += indentify_int(i+1, 10) + " "
+				content += indentify_float(mps[keys[i]].pos.x, 5, 10) + " "
+				content += indentify_float(mps[keys[i]].pos.y, 5, 10) + " "
+				content += indentify_float(mps[keys[i]].pos.z, 5, 10) + " "
+				content += indentify_int(mps[keys[i]].mm, 10)
+				content += "\n"
+			}
+			$("#mp").text(content)
+		}
+		
+		function indentify_int(n, indent){
+			let s = n+""
+			let slen = s.length
+			if (indent < slen) console.error("indent < slen")
+			if (indent > 29) console.error("indent > 29")
+			s="                             ".substring(0, indent-slen)+s
+			return s
+		}
+
+		function indentify_float(n, k, indent){
+			let _n = Math.round(n*(10**k))/(10**k)
+			let s = _n+""
+			let _s = s.split(".")
+			if (_s.length > 2) console.error("_s.length > 2")
+			if (_s.length === 2){
+				s = _s[0] +"."+ _s[1].substring(0, k)
+			} else {
+				if (s.length < indent-1){
+					s=s+".0"
+				}
+			}
+			let slen = s.length
+			//内部で決める値
+			if (indent < slen) console.error("indent < slen")
+			if (indent > 29) console.error("indent > 29")
+			s="                             ".substring(0, indent-slen)+s
+			return s
+		}
+
+		function add_history(param){
+			item.push(param)
+			if (item.length > 10){item = item.slice(1,item.length)}
+			localStorage.setItem("_history", JSON.stringify(item))
+			refresh_history()
+		}
+			
+		function load_history(){
+			const ls = localStorage.getItem("_history")
+			if (ls) {
+				try {
+					item = JSON.parse(ls)
+					refresh_history()
+				} catch (e) {
+					item = []
+					refresh_history()
+					console.error(e)
+				}
+			}
+		}
+		const modename = ["粒子(格子)","粒子(等間隔)","粒子(成層)", "APDI (等幅)","APDI (倍化)", "境界条件"]
+		function refresh_history(){
+			if (item.length === 0) {
+				$("#history").attr("disabled", "")
+			} else {
+				$("#history").removeAttr("disabled")
+			}
+			$("#history").html("")
+			for (let i = item.length-1;i >= 0;i--){
+				const his = item[i]
+				$("#history").append($("<option>", {
+					"value": JSON.stringify(his),
+					text: `${modename[his[0]]} :${his.slice(1,his.length).join(", ")}`
+				}))
+			}
+		}
+
+		function use_history(arr){
+			if (arr[0] === 1){
+				//const use_para = [mode, mm, x1, y1, z1, x2, y2, z2, ppg, width]
+				$("#mm").val(arr[1])
+				$("#x1").val(arr[2])
+				$("#y1").val(arr[3])
+				$("#z1").val(arr[4])
+				$("#x2").val(arr[5])
+				$("#y2").val(arr[6])
+				$("#z2").val(arr[7])
+				$("#ppg").val(arr[8])
+				$("#width").val(arr[9])
+			} else if (arr[0] === 2) {
+				//const use_para = [mode, mm, x1, y1, z1, x2, y2, z2, dx]
+				$("#mm").val(arr[1])
+				$("#x1").val(arr[2])
+				$("#y1").val(arr[3])
+				$("#z1").val(arr[4])
+				$("#x2").val(arr[5])
+				$("#y2").val(arr[6])
+				$("#z2").val(arr[7])
+				$("#dx").val(arr[8])
+			} else if (arr[0] === 3) {
+				//const use_para = [mode, mm, lenx, leny, ppg, width, height]
+				$("#mm").val(arr[1])
+				$("#lenx").val(arr[2])
+				$("#leny").val(arr[3])
+				$("#ppg").val(arr[4])
+				$("#width").val(arr[5])
+				$("#height").val(arr[6])
+			}
+			$("#mode").val(arr[0]+"")
+		}
+		
+		function alertbox(msg, level){
+			const a = ["success", "warning", "danger"]
+			if (level > 2) level = 2
+			if (level < 0) level = 0
+			$("#alert").removeClass("alert-success")
+			$("#alert").removeClass("alert-warning")
+			$("#alert").removeClass("alert-danger")
+			$("#alert").addClass("alert-"+a[level])
+			$("#alert_text").text(msg)
+			$("#alert").removeAttr("hidden")
+		}
+		
+		function initLS(){
+			$("input[type=text]").each(function(i, elem){
+				if (elem.hasAttribute("id")){
+					$(elem).on('change', function(ev2){
+						let id = $(ev2.target).attr("id")
+						let val = $(ev2.target).val()
+						localStorage.setItem(id, val)
+					});
+					let ls = localStorage.getItem($(elem).attr("id"))
+					if (ls) {
+						$(elem).val(ls)
+					}
+				}
+			})
+			$("input[type=number]").each(function(i, elem){
+				if (elem.hasAttribute("id")){
+					if ($(elem).attr("id") === "visu_time") return
+					$(elem).on('change', function(ev2){
+						let id = $(ev2.target).attr("id")
+						let val = $(ev2.target).val()
+						localStorage.setItem(id, val)
+					});
+					let ls = localStorage.getItem($(elem).attr("id"))
+					if (ls) {
+						$(elem).val(ls)
+					}
+				}
+			})
+			$("input[type=radio]").each(function(i, elem){
+				if (elem.hasAttribute("name")){
+					$(elem).on('change', function(ev2){
+						let name = $(ev2.target).attr("name")
+						let val = $("input[name="+name+"]:checked").val()
+						localStorage.setItem(name, val)
+					});
+					//無駄に三回実行されるけどまあいいや
+					let ls = localStorage.getItem($(elem).attr("name"))
+					if (ls && ls === $(elem).val()) {
+						$(elem).val([ls])
+						$(elem).trigger("change")
+					}
+				}
+			})
+			$("input[type=checkbox]").each(function(i, elem){
+				if (elem.hasAttribute("id")){
+					$(elem).on('change', function(ev2){
+						let name = $(ev2.target).attr("id")
+						let val = $(ev2.target).prop("checked") ? "1" : "0"
+						localStorage.setItem(name, val)
+					});
+					let ls = localStorage.getItem($(elem).attr("id"))
+					if (ls) {
+						$(elem).prop("checked", ls === "1")
+						$(elem).trigger("change")
+					}
+				}
+			})
+			$("input[type=range]").each(function(i, elem){
+				if (elem.hasAttribute("id")){
+					$(elem).on('change', function(ev2){
+						let name = $(ev2.target).attr("id")
+						let val = $(ev2.target).val()
+						localStorage.setItem(name, val)
+					});
+					let ls = localStorage.getItem($(elem).attr("id"))
+					if (ls) {
+						$(elem).val(ls)
+					}
+				}
+			})
+			$("select").each(function(i, elem){
+				if (elem.hasAttribute("id")){
+					let ls = localStorage.getItem($(elem).attr("id"))
+					if (ls) {
+						$(elem).val(ls)
+					}
+					$(elem).trigger("change")
+					$(elem).on('change', function(ev2){
+						let name = $(ev2.target).attr("id")
+						let val = $(ev2.target).val()
+						localStorage.setItem(name, val)
+					});
+				}
+			})
+		}
+	</script>
+</body>
+</html>
