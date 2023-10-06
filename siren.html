@@ -1,0 +1,263 @@
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>.absolute{
+        position: absolute;
+    }
+    .white {
+        color:#ccc
+    }
+    .black{
+        background-color: black;
+    }
+    .inline{
+        display: inline-block;
+    }
+    *{
+        font-family: "HG創英角ｺﾞｼｯｸUB";
+        font-weight: 900;
+        font-size: 1.2em;
+    }
+    .digit_font{
+        transform: scale(1.5, 1);
+    }
+    .japanese_font{
+        transform: scale(1,1.05);
+    }
+    #upper{
+        background: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,1), rgba(0,0,0,1), rgba(0,0,0,0))
+    }
+    #lower{
+        background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,1), rgba(0,0,0,1), rgba(0,0,0,1))
+    }
+    body{
+        overflow: hidden;
+    }</style>
+</head>
+<body class="black">
+    <div id="div_test" class="inline digit_font">0</div>
+    <div id="s2_1" class="absolute white digit_font"></div>
+    <div id="s2_2" class="absolute white digit_font"></div>
+    <div id="s2_3" class="absolute white digit_font"></div>
+    <div id="s1_1" class="absolute white digit_font"></div>
+    <div id="s1_2" class="absolute white digit_font"></div>
+    <div id="s1_3" class="absolute white digit_font"></div>
+    <div id="m2_1" class="absolute white digit_font"></div>
+    <div id="m2_2" class="absolute white digit_font"></div>
+    <div id="m2_3" class="absolute white digit_font"></div>
+    <div id="m1_1" class="absolute white digit_font"></div>
+    <div id="m1_2" class="absolute white digit_font"></div>
+    <div id="m1_3" class="absolute white digit_font"></div>
+    <div id="h2_1" class="absolute white digit_font"></div>
+    <div id="h2_2" class="absolute white digit_font"></div>
+    <div id="h2_3" class="absolute white digit_font"></div>
+    <div id="h1_1" class="absolute white digit_font"></div>
+    <div id="h1_2" class="absolute white digit_font"></div>
+    <div id="h1_3" class="absolute white digit_font"></div>
+    <div id="year" class="absolute white digit_font"></div>
+
+    <div id="s" class="absolute white japanese_font">秒</div>
+    <div id="m" class="absolute white japanese_font">分</div>
+    <div id="h" class="absolute white japanese_font">時</div>
+    <div id="l" class="absolute white japanese_font">／</div>
+    <div id="y" class="absolute white japanese_font">年</div>
+
+    <div id="upper" class="absolute"></div>
+    <div id="lower" class="absolute"></div>
+    <div id="front" class="absolute"></div>
+    <script>
+        let div_test = document.getElementById("div_test")
+        let div_s = document.getElementById("s")
+        let div_m = document.getElementById("m")
+        let div_h = document.getElementById("h")
+        let div_l = document.getElementById("l")
+        let div_d = document.getElementById("d")
+        let div_mo = document.getElementById("mo")
+        let div_y = document.getElementById("y")
+
+        let div_s2_1 = document.getElementById("s2_1")
+        let div_s2_2 = document.getElementById("s2_2")
+        let div_s2_3 = document.getElementById("s2_3")
+        let div_s1_1 = document.getElementById("s1_1")
+        let div_s1_2 = document.getElementById("s1_2")
+        let div_s1_3 = document.getElementById("s1_3")
+        let div_m2_1 = document.getElementById("m2_1")
+        let div_m2_2 = document.getElementById("m2_2")
+        let div_m2_3 = document.getElementById("m2_3")
+        let div_m1_1 = document.getElementById("m1_1")
+        let div_m1_2 = document.getElementById("m1_2")
+        let div_m1_3 = document.getElementById("m1_3")
+        let div_h2_1 = document.getElementById("h2_1")
+        let div_h2_2 = document.getElementById("h2_2")
+        let div_h2_3 = document.getElementById("h2_3")
+        let div_h1_1 = document.getElementById("h1_1")
+        let div_h1_2 = document.getElementById("h1_2")
+        let div_h1_3 = document.getElementById("h1_3")
+        let div_year = document.getElementById("year")
+
+        let div_upper = document.getElementById("upper")
+        let div_lower = document.getElementById("lower")
+        let div_front = document.getElementById("front")
+
+        let agarihaba = new Array(10)
+        for (let i = 0; i < agarihaba.length; i++) {
+            agarihaba[i] = 0
+        }
+
+        function zeroume2keta(num){
+            if (num >= 10){
+                return ""+num
+            } else {
+                return "0"+num
+            }
+        }
+
+        const height = div_test.clientHeight*0.96
+        const width = div_test.clientWidth
+
+        function clock(){
+            let now = new Date()
+            let year = zeroume2keta(now.getFullYear())
+            let hour = zeroume2keta(now.getHours())
+            let minute = zeroume2keta(now.getMinutes())
+            let second = zeroume2keta(now.getSeconds())
+            let milisec = now.getMilliseconds()
+
+            agarihaba[9] = 0.5- milisec/1000
+            if ((second[1] == "9" && milisec > 500) || second[1] == "0" && milisec < 500){
+                agarihaba[8] = 0.5- milisec/1000
+            } else {
+                agarihaba[8] = 0
+            }
+            if ((second == "59" && milisec > 500) || second == "00" && milisec < 500){
+                agarihaba[7] = 0.5- milisec/1000
+            } else {
+                agarihaba[7] = 0
+            }
+            if ((second == "59" && minute[1] == "9" && milisec > 500) 
+              ||(second == "00" && minute[1] == "0" && milisec < 500)){
+                agarihaba[6] = 0.5- milisec/1000
+            } else {
+                agarihaba[6] = 0
+            }
+            if ((second == "59" && minute == "59" && milisec > 500) 
+              ||(second == "00" && minute == "00" && milisec < 500)){
+                agarihaba[5] = 0.5- milisec/1000
+            } else {
+                agarihaba[5] = 0
+            }
+            if ((second == "59" && minute == "59" && (hour == "23" || hour[1] == "9")&& milisec > 500) 
+              ||(second == "00" && minute == "00" && hour[1] == "0" && milisec < 500)){
+                agarihaba[4] = 0.5- milisec/1000
+            } else {
+                agarihaba[4] = 0
+            }
+
+            div_s2_1.innerText = second[1] == "0" ? 9 : parseInt(second[1])-1
+            div_s2_2.innerText = second[1]
+            div_s2_3.innerText = second[1] == "9" ? 0 : parseInt(second[1])+1
+            div_s1_1.innerText = second[0] == "0" ? 5 : parseInt(second[0])-1
+            div_s1_2.innerText = second[0]
+            div_s1_3.innerText = second[0] == "5" ? 0 : parseInt(second[0])+1
+            div_m2_1.innerText = minute[1] == "0" ? 9 : parseInt(minute[1])-1
+            div_m2_2.innerText = minute[1]
+            div_m2_3.innerText = minute[1] == "9" ? 0 : parseInt(minute[1])+1
+            div_m1_1.innerText = minute[0] == "0" ? 5 : parseInt(minute[0])-1
+            div_m1_2.innerText = minute[0]
+            div_m1_3.innerText = minute[0] == "5" ? 0 : parseInt(minute[0])+1
+            div_h2_1.innerText = hour == "00" ? 3 : (hour[1] == "0" ? 9 : parseInt(hour[1])-1)
+            div_h2_2.innerText = hour[1]
+            div_h2_3.innerText = hour == "23" ? 0 : (hour[1] == "9" ? 0 : parseInt(hour[1])+1)
+            div_h1_1.innerText = hour[0] == "0" ? 2 : parseInt(hour[0])-1
+            div_h1_2.innerText = hour[0]
+            div_h1_3.innerText = hour[0] == "2" ? 0 : parseInt(hour[0])+1
+
+            div_year.innerText = year
+
+            const tops = window.innerHeight/2 - height*1.5
+            const left = window.innerWidth/2 - (width*1.4*6 + width*2.3*4 + width*5.1)/2
+
+            div_s2_1.style.top = tops +  agarihaba[9] * height
+            div_s2_2.style.top = tops + (agarihaba[9]+1) * height
+            div_s2_3.style.top = tops + (agarihaba[9]+2) * height
+            div_s1_1.style.top = tops +  agarihaba[8] * height
+            div_s1_2.style.top = tops + (agarihaba[8]+1) * height
+            div_s1_3.style.top = tops + (agarihaba[8]+2) * height
+            div_m2_1.style.top = tops +  agarihaba[7] * height
+            div_m2_2.style.top = tops + (agarihaba[7]+1) * height
+            div_m2_3.style.top = tops + (agarihaba[7]+2) * height
+            div_m1_1.style.top = tops +  agarihaba[6] * height
+            div_m1_2.style.top = tops + (agarihaba[6]+1) * height
+            div_m1_3.style.top = tops + (agarihaba[6]+2) * height
+            div_h2_1.style.top = tops +  agarihaba[5] * height
+            div_h2_2.style.top = tops + (agarihaba[5]+1) * height
+            div_h2_3.style.top = tops + (agarihaba[5]+2) * height
+            div_h1_1.style.top = tops +  agarihaba[4] * height
+            div_h1_2.style.top = tops + (agarihaba[4]+1) * height
+            div_h1_3.style.top = tops + (agarihaba[4]+2) * height
+            div_s.style.top  = tops + height
+            div_m.style.top  = tops + height
+            div_h.style.top  = tops + height
+            div_l.style.top  = tops + height
+            div_y.style.top  = tops + height
+            div_year.style.top = tops + height
+
+            div_upper.style.top = tops - height
+            div_upper.style.left = 0
+            div_upper.style.minWidth = window.innerWidth
+            div_upper.style.minHeight = height*2
+            div_lower.style.top = tops + height * 2
+            div_lower.style.left = 0
+            div_lower.style.minWidth = window.innerWidth
+            div_lower.style.minHeight = height*2
+            div_front.style.minWidth = window.innerWidth
+            div_front.style.minHeight = window.innerHeight
+
+            let x = left + width*1.4*6 + width*2.3*4 + width*5.1
+            div_s.style.left = x
+            x -= width*1.4
+            div_s2_1.style.left = x
+            div_s2_2.style.left = x
+            div_s2_3.style.left = x
+            x -= width*1.4
+            div_s1_1.style.left = x
+            div_s1_2.style.left = x
+            div_s1_3.style.left = x
+            x -= width*2.3
+            div_m.style.left = x
+            x -= width*1.4
+            div_m2_1.style.left = x
+            div_m2_2.style.left = x
+            div_m2_3.style.left = x
+            x -= width*1.4
+            div_m1_1.style.left = x
+            div_m1_2.style.left = x
+            div_m1_3.style.left = x
+            x -= width*2.3
+            div_h.style.left = x
+            x -= width*1.4
+            div_h2_1.style.left = x
+            div_h2_2.style.left = x
+            div_h2_3.style.left = x
+            x -= width*1.4
+            div_h1_1.style.left = x
+            div_h1_2.style.left = x
+            div_h1_3.style.left = x
+            x -= width*2.3
+            div_l.style.left = x
+            x -= width*2.3
+            div_y.style.left = x
+            x -= width*5.1
+            div_year.style.left = x
+
+            setTimeout(clock, 20)
+        }
+
+        clock()
+        
+
+    </script>
+</body>
+</html>
