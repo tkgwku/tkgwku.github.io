@@ -24,9 +24,6 @@
     .digit_font{
         transform: scale(1.5, 1);
     }
-    .digit_font2{
-        transform: scale(1,1);
-    }
     .japanese_font{
         transform: scale(1,1.05);
     }
@@ -38,7 +35,8 @@
     }
     body{
         overflow: hidden;
-    }</style>
+    }
+    </style>
 </head>
 <body class="black">
     <div id="div_test" class="inline digit_font">0</div>
@@ -72,12 +70,6 @@
     <div id="lower" class="absolute"></div>
     <div id="front" class="absolute"></div>
     <script>
-        let fontAvailable = document.fonts.check("HG創英角ｺﾞｼｯｸUB");
-        if (!fontAvailable){
-            document.querySelectorAll(".digit_font").forEach(elem => {
-                elem.classList.add("digit_font2");
-            });
-        }
         let div_test = document.getElementById("div_test")
         let div_s = document.getElementById("s")
         let div_m = document.getElementById("m")
